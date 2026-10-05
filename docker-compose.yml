@@ -1,0 +1,19 @@
+# MySQL 8 for local development.
+# Ollama stays on the host. The Next.js and FastAPI processes are not containers yet.
+# Host port 3307 avoids a local MariaDB or MySQL already bound to 3306.
+# MYSQL_ROOT_PASSWORD is read from the gitignored .env file.
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: local-ai-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: local_ai_assistant
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
