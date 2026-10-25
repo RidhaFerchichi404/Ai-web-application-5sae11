@@ -52,12 +52,16 @@ class OllamaService:
                 message=f"Model {model} is not installed in Ollama.",
             )
 
-    async def iter_chat(self, message: str, model: str) -> AsyncIterator[dict[str, str | bool]]:
+    async def iter_chat(
+        self,
+        messages: list[dict[str, str]],
+        model: str,
+    ) -> AsyncIterator[dict[str, str | bool]]:
         """Yield one object per Ollama chunk. The last object has done=true."""
         timeout = httpx.Timeout(connect=5.0, read=None, write=30.0, pool=5.0)
         payload = {
             "model": model,
-            "messages": [{"role": "user", "content": message}],
+            "messages": messages,
             "stream": True,
         }
         saw_done = False

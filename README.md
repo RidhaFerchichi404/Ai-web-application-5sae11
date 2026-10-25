@@ -1,12 +1,12 @@
 # Local AI Assistant
 
-Status: Phase 3 complete. Phase 4 has not started.
+Status: Phase 4 complete. Phase 5 has not started.
 
 Temporary product name. A final name has not been chosen. This repository was started as `Ai-web-application-5sae11`.
 
 Local AI Assistant will be a local-first web workspace for conversation with a model that runs on the same machine. The interface will be dark, minimal, and developer-oriented. It is inspired by that general feeling, and it will be an original interface. It will not copy another product’s code, branding, logos, or layout.
 
-The FastAPI backend foundation is in place: configuration, MySQL models and migrations, logging, error handling, and `GET /api/health`. Chat, Ollama calls, file uploads, RAG, and the Next.js interface are not implemented yet.
+The API calls local Ollama, stores conversations and messages, and streams chat with that history. File uploads, RAG, and the Next.js interface are not implemented yet.
 
 ## Overview
 
@@ -170,7 +170,7 @@ Any compatible model the user has pulled may be used instead. GPU hardware is no
 
 ## Installation
 
-Status: Backend steps are runnable. The frontend is not created yet. `GET /api/models` and `POST /api/chat` call local Ollama. Conversations are not stored yet.
+Status: Backend steps are runnable. The frontend is not created yet. Conversations and chat messages are stored in MySQL. File uploads are not implemented yet.
 
 1. Install the prerequisites in [docs/setup.md](docs/setup.md).
 2. Install Ollama, then pull a chat model and an embedding model of your choice.
@@ -195,14 +195,14 @@ Do not create a `.env` file with real secrets in version control. `.env.example`
 
 ## Development
 
-Work proceeds one phase at a time. Phase 3 connects the API to local Ollama. Phase 4 has not started.
+Work proceeds one phase at a time. Phase 4 stores conversations and messages. Phase 5 has not started.
 
 | Phase | Focus | State |
 | --- | --- | --- |
 | 1 | Documentation and architecture | Complete |
 | 2 | Backend foundation | Complete |
 | 3 | Ollama integration | Complete |
-| 4 | Conversations and messages | Planned |
+| 4 | Conversations and messages | Complete |
 | 5 | File management | Planned |
 | 6 | RAG | Planned |
 | 7 | Frontend | Planned |
@@ -249,8 +249,8 @@ Details: [docs/rag.md](docs/rag.md).
 [DONE]    Phase 1 — Documentation and architecture
 [DONE]    Phase 2 — Backend foundation
 [DONE]    Phase 3 — Ollama
-[NEXT]    Phase 4 — Conversations
-          Phase 5 — Files
+[DONE]    Phase 4 — Conversations
+[NEXT]    Phase 5 — Files
           Phase 6 — RAG
           Phase 7 — Frontend
           Phase 8 — UX

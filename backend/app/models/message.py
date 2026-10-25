@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index, String, text
-from sqlalchemy.dialects.mysql import BIGINT, DATETIME, LONGTEXT
+from sqlalchemy import BigInteger, CheckConstraint, ForeignKey, Index, String, Text, TIMESTAMP, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -17,18 +16,18 @@ class Message(Base):
         Index("ix_messages_conversation_id_created_at", "conversation_id", "created_at"),
     )
 
-    id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     conversation_id: Mapped[int] = mapped_column(
-        BIGINT(unsigned=True),
+        BigInteger,
         ForeignKey("conversations.id", ondelete="CASCADE"),
         nullable=False,
     )
     role: Mapped[str] = mapped_column(String(32), nullable=False)
-    content: Mapped[str] = mapped_column(LONGTEXT, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DATETIME(fsp=6),
+        TIMESTAMP,
         nullable=False,
-        server_default=text("CURRENT_TIMESTAMP(6)"),
+        server_default=text("NOW()"),
     )
 
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")

@@ -56,13 +56,13 @@ These values are examples. Deployments will set their own model names. Code will
 
 ## Model selection
 
-`GET /api/models` lists installed Ollama models, the configured chat and embedding names, and whether each configured model is installed. The composer will show the active chat model. Selecting another installed model will apply to the next message and, in Phase 4, update the conversation stored model name. The embedding model stays a server setting, because mixing embedding models in one index would make similarity meaningless.
+`GET /api/models` lists installed Ollama models, the configured chat and embedding names, and whether each configured model is installed. The composer will show the active chat model. Selecting another installed model on `POST /api/chat` or `PATCH /api/conversations/{id}` updates the conversation's stored model name. The embedding model stays a server setting, because mixing embedding models in one index would make similarity meaningless.
 
 ## Streaming
 
 Chat responses stream from Ollama through FastAPI as newline-delimited JSON. The framing is documented in [api.md](api.md). Closing the client connection stops generation. A cancel route is not provided.
 
-Phase 3 sends only the current user message. History sent to the model will be the persisted messages for that conversation, plus any retrieved chunks when RAG is enabled for the request. The server will not stream partial text into MySQL. It will store the completed assistant message when the stream finishes. If the user stops early, the stored assistant message will be the text received before the stop.
+Chat sends the persisted user and assistant messages for that conversation, including the new user message. Retrieved chunks will be added when RAG is enabled for the request. The server does not stream partial text into MySQL. It stores the assistant message when the stream finishes. If the user stops early, the stored assistant message is the text received before the stop.
 
 ## Error handling
 

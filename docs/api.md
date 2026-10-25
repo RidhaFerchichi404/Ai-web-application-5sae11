@@ -1,6 +1,6 @@
 # API
 
-Status: `GET /api/health`, `GET /api/models`, and stateless `POST /api/chat` are implemented. Every other route on this page is `Status: Planned`.
+Status: Health, models, conversations, messages, and `POST /api/chat` are implemented. Document routes on this page are `Status: Planned`.
 
 The frontend will call FastAPI over HTTP. Responses will be JSON except for the streamed chat body. Errors will use a small JSON shape and will not leak stack traces, filesystem paths, or database details. See [security.md](security.md).
 
@@ -26,31 +26,31 @@ Returns the model names installed in Ollama, `chat_model`, `embedding_model`, an
 
 ### `GET /api/conversations`
 
-Status: Planned. Phase 4.
+Status: Implemented.
 
-Lists conversations for the sidebar, newest activity first. An optional search string will filter by title.
+Lists the local user's conversations, newest `updated_at` first. Optional query `q` filters by title. The response does not include `user_id`.
 
 ### `POST /api/conversations`
 
-Status: Planned. Phase 4.
+Status: Implemented.
 
-Creates a conversation. The title may be omitted and filled from the first message later.
+Creates a conversation. The title may be omitted and is stored as `New conversation` until the first chat message replaces it. Optional `chat_model` must already be installed in Ollama.
 
 ### `GET /api/conversations/{id}`
 
-Status: Planned. Phase 4.
+Status: Implemented.
 
-Returns one conversation.
+Returns one conversation. An unknown id returns `404` with code `conversation_not_found`.
 
 ### `PATCH /api/conversations/{id}`
 
-Status: Planned. Phase 4.
+Status: Implemented.
 
-Renames a conversation or updates the stored chat model name.
+Renames a conversation or updates the stored chat model name. An empty title is rejected. A new chat model name must be installed.
 
 ### `DELETE /api/conversations/{id}`
 
-Status: Planned. Phase 4.
+Status: Implemented.
 
 Deletes a conversation and its messages. Linked document rows stay, with the conversation link cleared.
 
@@ -58,21 +58,23 @@ Deletes a conversation and its messages. Linked document rows stay, with the con
 
 ### `GET /api/conversations/{id}/messages`
 
-Status: Planned. Phase 4.
+Status: Implemented.
 
-Returns messages for a conversation in creation order.
+Returns messages for a conversation in creation order: `id`, `role`, `content`, and `created_at`.
 
 ### `POST /api/chat`
 
-Status: Implemented for a single message. Phase 4 will add conversation ids and persistence. Phase 6 will add document context.
+Status: Implemented. Phase 6 will add document context.
 
 Body:
 
 ```json
-{ "message": "Hello", "model": null }
+{ "conversation_id": 1, "message": "Hello", "model": null }
 ```
 
-`message` is required. `model` is optional. When it is omitted or null, the server uses `OLLAMA_CHAT_MODEL`. A model that is not installed returns `404` with code `model_not_installed`. The server does not fall back to another provider. This route does not read or write MySQL.
+`conversation_id` and `message` are required. `model` is optional. When it is omitted or null, the server uses the conversation's stored chat model, or `OLLAMA_CHAT_MODEL` when that is empty. The chosen installed model is saved on the conversation. A missing conversation returns `404` with code `conversation_not_found`. A model that is not installed returns `404` with code `model_not_installed`. The server does not fall back to another provider.
+
+The user message is stored before streaming. Ollama receives the stored user and assistant turns for that conversation. The assistant reply is stored once, when the stream finishes or the client disconnects. Empty assistant text is not stored. Partial tokens are not written one by one.
 
 The response is `application/x-ndjson`. Each line is one JSON object:
 

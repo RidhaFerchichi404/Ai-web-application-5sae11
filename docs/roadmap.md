@@ -1,6 +1,6 @@
 # Roadmap
 
-Status: Defined as a sequence. Phases 1, 2, and 3 are complete. Phase 4 is next and has not started. Every later phase is Planned.
+Status: Defined as a sequence. Phases 1 through 4 are complete. Phase 5 is next and has not started. Every later phase is Planned.
 
 ```text
 [DONE]
@@ -12,9 +12,10 @@ Phase 2 — Backend foundation
 [DONE]
 Phase 3 — Ollama
 
-[NEXT]
+[DONE]
 Phase 4 — Conversations
 
+[NEXT]
 Phase 5 — Files
 
 Phase 6 — RAG
@@ -42,7 +43,7 @@ Complete. Local chat streaming, model discovery, configurable model names, and a
 
 ## Phase 4 — Conversations
 
-Planned. Create, list, rename, and delete conversations. Persist messages.
+Complete. Create, list, rename, and delete conversations. Chat stores messages and sends that history to Ollama. Uploads are not included.
 
 ## Phase 5 — Files
 

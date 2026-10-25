@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #09090b;
+  --surface: #18181b;
+  --surface-2: #27272a;
+  --border: #3f3f46;
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__next {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.prose {
+  color: var(--text);
+  line-height: 1.7;
+  word-break: break-word;
+}
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: var(--text);
+  font-weight: 600;
+  margin: 1em 0 0.4em;
+}
+.prose p {
+  margin: 0.5em 0;
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.prose ul,
+.prose ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+.prose li {
+  margin: 0.2em 0;
+}
+.prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  color: var(--text-muted);
+  margin: 0.75em 0;
+}
+.prose code:not(pre code) {
+  background: var(--surface-2);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: ui-monospace, monospace;
+}
+.prose pre {
+  margin: 0.75em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.875em;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.75em;
+}
+.prose th {
+  background: var(--surface-2);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

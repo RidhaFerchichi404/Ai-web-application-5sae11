@@ -1,7 +1,9 @@
 import logging
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.conversations import router as conversation_router
 from app.api.health import router as health_router
 from app.api.ollama import router as ollama_router
 from app.core.config import get_settings
@@ -19,11 +21,18 @@ def create_app() -> FastAPI:
     logger.info("application starting env=%s", settings.app_env)
 
     app = FastAPI(title="Local AI Assistant")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.add_middleware(RequestIdMiddleware)
     app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
     app.include_router(health_router, prefix="/api")
     app.include_router(ollama_router, prefix="/api")
+    app.include_router(conversation_router, prefix="/api")
     return app
 
 

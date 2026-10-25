@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     ollama_embedding_model: str = Field(min_length=1)
     max_file_size_mb: int = Field(gt=0)
     upload_directory: str = Field(min_length=1)
+    cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
 
 @lru_cache

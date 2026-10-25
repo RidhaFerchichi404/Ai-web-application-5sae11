@@ -10,33 +10,32 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import mysql
+from sqlalchemy.dialects.postgresql import JSONB
 
 revision: str = "0001_initial"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-_created = sa.text("CURRENT_TIMESTAMP(6)")
-_updated = sa.text("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)")
+_now = sa.text("NOW()")
 
 
 def upgrade() -> None:
     op.create_table(
         "users",
-        sa.Column("id", mysql.BIGINT(unsigned=True), primary_key=True, autoincrement=True),
+        sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
         sa.Column("display_name", sa.String(255), nullable=False),
-        sa.Column("created_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_created),
-        sa.Column("updated_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_updated),
+        sa.Column("created_at", sa.TIMESTAMP, nullable=False, server_default=_now),
+        sa.Column("updated_at", sa.TIMESTAMP, nullable=False, server_default=_now),
     )
     op.create_table(
         "conversations",
-        sa.Column("id", mysql.BIGINT(unsigned=True), primary_key=True, autoincrement=True),
-        sa.Column("user_id", mysql.BIGINT(unsigned=True), nullable=False),
+        sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
+        sa.Column("user_id", sa.BigInteger, nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("chat_model", sa.String(255), nullable=True),
-        sa.Column("created_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_created),
-        sa.Column("updated_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_updated),
+        sa.Column("created_at", sa.TIMESTAMP, nullable=False, server_default=_now),
+        sa.Column("updated_at", sa.TIMESTAMP, nullable=False, server_default=_now),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
     )
     op.create_index(
@@ -46,11 +45,11 @@ def upgrade() -> None:
     )
     op.create_table(
         "messages",
-        sa.Column("id", mysql.BIGINT(unsigned=True), primary_key=True, autoincrement=True),
-        sa.Column("conversation_id", mysql.BIGINT(unsigned=True), nullable=False),
+        sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
+        sa.Column("conversation_id", sa.BigInteger, nullable=False),
         sa.Column("role", sa.String(32), nullable=False),
-        sa.Column("content", mysql.LONGTEXT(), nullable=False),
-        sa.Column("created_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_created),
+        sa.Column("content", sa.Text, nullable=False),
+        sa.Column("created_at", sa.TIMESTAMP, nullable=False, server_default=_now),
         sa.CheckConstraint("role IN ('user', 'assistant', 'system')", name="ck_messages_role"),
         sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"], ondelete="CASCADE"),
     )
@@ -61,18 +60,18 @@ def upgrade() -> None:
     )
     op.create_table(
         "documents",
-        sa.Column("id", mysql.BIGINT(unsigned=True), primary_key=True, autoincrement=True),
-        sa.Column("user_id", mysql.BIGINT(unsigned=True), nullable=False),
-        sa.Column("conversation_id", mysql.BIGINT(unsigned=True), nullable=True),
+        sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
+        sa.Column("user_id", sa.BigInteger, nullable=False),
+        sa.Column("conversation_id", sa.BigInteger, nullable=True),
         sa.Column("original_filename", sa.String(255), nullable=False),
         sa.Column("stored_filename", sa.String(255), nullable=False),
         sa.Column("media_type", sa.String(127), nullable=False),
         sa.Column("extension", sa.String(16), nullable=False),
-        sa.Column("size_bytes", mysql.BIGINT(unsigned=True), nullable=False),
+        sa.Column("size_bytes", sa.BigInteger, nullable=False),
         sa.Column("status", sa.String(32), nullable=False),
-        sa.Column("error_message", sa.Text(), nullable=True),
-        sa.Column("created_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_created),
-        sa.Column("updated_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_updated),
+        sa.Column("error_message", sa.Text, nullable=True),
+        sa.Column("created_at", sa.TIMESTAMP, nullable=False, server_default=_now),
+        sa.Column("updated_at", sa.TIMESTAMP, nullable=False, server_default=_now),
         sa.CheckConstraint(
             "status IN ('UPLOADED', 'PROCESSING', 'READY', 'FAILED')",
             name="ck_documents_status",
@@ -86,12 +85,12 @@ def upgrade() -> None:
     op.create_index("ix_documents_status", "documents", ["status"])
     op.create_table(
         "document_chunks",
-        sa.Column("id", mysql.BIGINT(unsigned=True), primary_key=True, autoincrement=True),
-        sa.Column("document_id", mysql.BIGINT(unsigned=True), nullable=False),
-        sa.Column("chunk_index", mysql.INTEGER(unsigned=True), nullable=False),
-        sa.Column("content", mysql.LONGTEXT(), nullable=False),
-        sa.Column("embedding", mysql.JSON(), nullable=True),
-        sa.Column("created_at", mysql.DATETIME(fsp=6), nullable=False, server_default=_created),
+        sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
+        sa.Column("document_id", sa.BigInteger, nullable=False),
+        sa.Column("chunk_index", sa.Integer, nullable=False),
+        sa.Column("content", sa.Text, nullable=False),
+        sa.Column("embedding", JSONB, nullable=True),
+        sa.Column("created_at", sa.TIMESTAMP, nullable=False, server_default=_now),
         sa.ForeignKeyConstraint(["document_id"], ["documents.id"], ondelete="CASCADE"),
         sa.UniqueConstraint(
             "document_id",
@@ -104,6 +103,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_table("document_chunks")
     op.drop_table("documents")
+    op.drop_index("ix_messages_conversation_id_created_at", table_name="messages")
     op.drop_table("messages")
     op.drop_index("ix_conversations_user_id_updated_at", table_name="conversations")
     op.drop_table("conversations")

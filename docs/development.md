@@ -1,6 +1,6 @@
 # Development
 
-Status: Defined as the working plan. Phases 1, 2, and 3 are complete. Later phases are Planned. Phase 4 has not started.
+Status: Defined as the working plan. Phases 1 through 4 are complete. Later phases are Planned. Phase 5 has not started.
 
 Build one phase at a time. Do not start a phase until the previous phase is accepted. Do not describe a phase as done because its design is written here.
 
@@ -91,7 +91,7 @@ Status: Complete.
 
 ## PHASE 4 — CHAT SYSTEM
 
-Status: Planned.
+Status: Complete.
 
 - Conversations
 - Messages
@@ -101,7 +101,7 @@ Status: Planned.
 - Delete conversation
 - Message persistence
 
-Persistence will use the `conversations` and `messages` tables in [database.md](database.md). Endpoints are listed in [api.md](api.md).
+`POST /api/chat` requires a conversation id, sends the stored user and assistant turns to Ollama, and saves the user message plus the finished assistant text. There is one local user row and no login. Endpoints are listed in [api.md](api.md).
 
 ## PHASE 5 — FILE MANAGEMENT
 

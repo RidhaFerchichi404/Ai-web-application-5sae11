@@ -19,7 +19,7 @@ def ollama_transport():
         )
 
     yield apply
-    app.dependency_overrides.clear()
+    app.dependency_overrides.pop(get_ollama_service, None)
 
 
 def _tags(*names: str) -> httpx.Response:
@@ -58,20 +58,19 @@ def test_models_when_ollama_is_down(ollama_transport) -> None:
     }
 
 
-def test_chat_rejects_missing_model(ollama_transport) -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return _tags("other")
-
-    ollama_transport(handler)
+def test_chat_requires_conversation() -> None:
     response = TestClient(app).post("/api/chat", json={"message": "hello"})
 
-    assert response.status_code == 404
-    assert response.json()["error"]["code"] == "model_not_installed"
-    assert get_settings().ollama_chat_model in response.json()["error"]["message"]
+    assert response.status_code == 422
 
 
-def test_chat_streams_ndjson(ollama_transport) -> None:
+def test_iter_chat_sends_history() -> None:
     chat_model = get_settings().ollama_chat_model
+    history = [
+        {"role": "user", "content": "hello"},
+        {"role": "assistant", "content": "Hi"},
+        {"role": "user", "content": "again"},
+    ]
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/tags":
@@ -79,6 +78,7 @@ def test_chat_streams_ndjson(ollama_transport) -> None:
         body = json.loads(request.content)
         assert body["model"] == chat_model
         assert body["stream"] is True
+        assert body["messages"] == history
         raw = "\n".join(
             [
                 json.dumps({"message": {"content": "Hel"}, "done": False}),
@@ -87,14 +87,13 @@ def test_chat_streams_ndjson(ollama_transport) -> None:
         )
         return httpx.Response(200, text=raw)
 
-    ollama_transport(handler)
-    with TestClient(app) as client:
-        with client.stream("POST", "/api/chat", json={"message": "hello"}) as response:
-            assert response.status_code == 200
-            assert response.headers["content-type"].startswith("application/x-ndjson")
-            lines = [json.loads(line) for line in response.iter_lines() if line]
+    service = OllamaService(get_settings(), transport=httpx.MockTransport(handler))
+    import asyncio
 
-    assert lines == [
+    async def collect() -> list[dict]:
+        return [chunk async for chunk in service.iter_chat(history, chat_model)]
+
+    assert asyncio.run(collect()) == [
         {"content": "Hel", "done": False},
         {"content": "lo", "done": True},
     ]

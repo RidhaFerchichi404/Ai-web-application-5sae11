@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, UniqueConstraint, text
-from sqlalchemy.dialects.mysql import BIGINT, DATETIME, INTEGER, JSON, LONGTEXT
+from sqlalchemy import BigInteger, ForeignKey, Integer, Text, TIMESTAMP, UniqueConstraint, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -18,19 +18,19 @@ class DocumentChunk(Base):
         UniqueConstraint("document_id", "chunk_index", name="uq_document_chunks_document_id_chunk_index"),
     )
 
-    id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     document_id: Mapped[int] = mapped_column(
-        BIGINT(unsigned=True),
+        BigInteger,
         ForeignKey("documents.id", ondelete="CASCADE"),
         nullable=False,
     )
-    chunk_index: Mapped[int] = mapped_column(INTEGER(unsigned=True), nullable=False)
-    content: Mapped[str] = mapped_column(LONGTEXT, nullable=False)
-    embedding: Mapped[list[float] | None] = mapped_column(JSON, nullable=True)
+    chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[list[float] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DATETIME(fsp=6),
+        TIMESTAMP,
         nullable=False,
-        server_default=text("CURRENT_TIMESTAMP(6)"),
+        server_default=text("NOW()"),
     )
 
     document: Mapped["Document"] = relationship(back_populates="chunks")

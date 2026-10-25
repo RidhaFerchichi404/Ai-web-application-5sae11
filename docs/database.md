@@ -6,7 +6,7 @@ The database name in the example configuration is `local_ai_assistant`. The URL 
 
 PostgreSQL is not part of this design. Embeddings will not use a PostgreSQL vector type. How similarity search reads embeddings is isolated in the vector search repository. See [decisions/README.md](decisions/README.md), Decision 005.
 
-Authentication is not scheduled in Phases 1–10. The `users` table still exists so conversations and documents have an owner when a later login decision is made. Until then, the backend may use a single local user row. That behavior is not implemented.
+Authentication is not scheduled in Phases 1–10. The `users` table still exists so conversations and documents have an owner when a later login decision is made. Until then, the API uses one `users` row with display name `Local`, created on the first conversation write.
 
 ## Relationships
 
@@ -68,7 +68,7 @@ Indexes:
 
 - Primary key.
 - Index on `user_id`, `updated_at` for the sidebar history.
-- Index on `title` is optional and can wait until search needs it. Phase 4 can start with application-side filtering if the history stays small.
+- Index on `title` is not added. `GET /api/conversations` filters titles in the query.
 
 ## messages
 
